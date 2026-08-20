@@ -1,0 +1,13 @@
+# Cấu hình dataset YOLO cho ShopAI
+# Sửa lại đường dẫn 'path' bên dưới tới thư mục dataset thực tế của bạn
+path: D:/Mobile/ShopAI/dataset
+
+# Đường dẫn thư mục ảnh tương đối so với 'path' ở trên
+train: images/train
+val: images/val
+
+# Khai báo các lớp sản phẩm (Classes)
+names:
+  0: ao_thun
+  1: quan_jean
+  2: giay_sneaker
