@@ -1,13 +1,14 @@
-import React from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-// Nhờ cấu hình Alias ở Bước 3,4, ta import cực kỳ ngắn gọn
-import HomeScreen from '@screens/HomeScreen';
+import React from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ThemeProvider } from "@contexts/ThemeContext";
+import HomeScreen from "@screens/HomeScreen";
 
-function App(): React.JSX.Element {
+function App() {
   return (
-    // SafeAreaProvider bọc ngoài cùng để tính toán phần "Tai thỏ" (Notch) trên iPhone
     <SafeAreaProvider>
-      <HomeScreen />
+      <ThemeProvider>
+        <HomeScreen />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

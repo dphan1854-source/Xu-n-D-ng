@@ -9,6 +9,7 @@
     "**/Pods"
   ],
   "compilerOptions": {
+    "jsx": "react-native",
     "baseUrl": ".",
     "paths": {
       "@assets/*": [
