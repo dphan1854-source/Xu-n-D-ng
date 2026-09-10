@@ -1,15 +1,22 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 // ĐÚNG: SafeAreaView phải lấy từ 'react-native-safe-area-context', KHÔNG lấy từ 'react-native'
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import ProductCard from "@components/ProductCard";
+import ShopButton from "@components/ShopButton";
 import { MOCK_PRODUCTS } from "@data/mockProducts";
 import { COLORS, SIZES } from "@constants/theme";
+import type { HomeStackParamList } from "@navigation/HomeStackNavigator";
 
-const HomeScreen = () => {
-  // Danh sách hiển thị giờ nằm trong State thay vì đọc thẳng MOCK_PRODUCTS,
-  // để hàm "làm mới" có chỗ ghi dữ liệu mới vào sau khi giả lập gọi lại API
+type HomeNavProp = NativeStackNavigationProp<HomeStackParamList, "Home">;
+
+const HomeScreen = ({ onLogout }: { onLogout?: () => void }) => {
+  const navigation = useNavigation<HomeNavProp>();
+
+  // Giữ nguyên State & Pull-to-refresh từ Sprint 4 Bước 4.5
   const [products, setProducts] = useState(MOCK_PRODUCTS);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -30,13 +37,29 @@ const HomeScreen = () => {
         {/* Header AppBar */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Khám phá</Text>
+          {onLogout && (
+            <ShopButton
+              title="Thoát"
+              onPress={onLogout}
+              style={{ width: 80, height: 32, backgroundColor: COLORS.textLight }}
+            />
+          )}
         </View>
 
         {/* FlashList: thuật toán Recycling viết bằng C++ của Shopify, nhanh hơn FlatList ~10 lần */}
         <FlashList
           data={products}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ProductCard product={item} />}
+          renderItem={({ item }) => (
+            // Chỉ gửi productId (ID) qua navigate, không gửi nguyên object sản phẩm
+            <Pressable
+              onPress={() =>
+                navigation.navigate("ProductDetail", { productId: item.id })
+              }
+            >
+              <ProductCard product={item} />
+            </Pressable>
+          )}
           // --- CẤU HÌNH GRID 2 CỘT ---
           numColumns={2} // Chia 2 cột (khe hở đã xử lý bằng margin trong ProductCard)
           estimatedItemSize={260} // Chiều cao ước lượng 1 thẻ, giúp FlashList tính trước bộ khung Recycle
@@ -63,6 +86,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIZES.padding,
     paddingVertical: 15,
     backgroundColor: COLORS.surface,
+    flexDirection: "row", // Chuyển Flexbox sang ngang
+    justifyContent: "space-between", // Đẩy title và nút thoát ra xa
+    alignItems: "center", // Căn giữa theo trục phụ
   },
   headerTitle: {
     fontSize: SIZES.h1,
