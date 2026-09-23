@@ -1,20 +1,17 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
-import ShopButton from "@components/ShopButton";
-import ShopInput from "@components/ui/ShopInput";
-import { COLORS, SIZES } from "@constants/theme";
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import ShopButton from '@components/ShopButton';
+import ShopInput from '@components/ui/ShopInput';
+import { COLORS, SIZES } from '@constants/theme';
+import { useAuthStore } from '@store/useAuthStore';
 
-const RegisterScreen = ({
-    onRegistered,
-    onGoLogin,
-}: {
-    onRegistered: (token: string) => void;
-    onGoLogin: () => void;
-}) => {
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirm, setConfirm] = useState("");
+const RegisterScreen = () => {
+    const navigation = useNavigation<any>();
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirm, setConfirm] = useState('');
     const [errors, setErrors] = useState<{
         name?: string;
         email?: string;
@@ -23,12 +20,14 @@ const RegisterScreen = ({
     }>({});
     const [loading, setLoading] = useState(false);
 
+    const login = useAuthStore((state) => state.login);
+
     const validate = () => {
         const next: typeof errors = {};
-        if (name.trim().length < 2) next.name = "Họ tên tối thiểu 2 ký tự";
-        if (!email.includes("@")) next.email = "Email không hợp lệ (phải chứa @)";
-        if (password.length < 6) next.password = "Mật khẩu phải có ít nhất 6 ký tự";
-        if (confirm !== password) next.confirm = "Xác nhận mật khẩu không khớp";
+        if (name.trim().length < 2) next.name = 'Họ tên tối thiểu 2 ký tự';
+        if (!email.includes('@')) next.email = 'Email không hợp lệ (phải chứa @)';
+        if (password.length < 6) next.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+        if (confirm !== password) next.confirm = 'Xác nhận mật khẩu không khớp';
         setErrors(next);
         return Object.keys(next).length === 0;
     };
@@ -40,7 +39,7 @@ const RegisterScreen = ({
         // Ch.9: đổi thành POST /api/auth/register thật (bcrypt + Prisma).
         setTimeout(() => {
             setLoading(false);
-            onRegistered("mock_token_123");
+            login('mock_token_123');
         }, 1200);
     };
 
@@ -92,7 +91,7 @@ const RegisterScreen = ({
                 style={styles.submitBtn}
             />
 
-            <Pressable onPress={onGoLogin} style={styles.loginLink}>
+            <Pressable onPress={() => navigation.navigate('Login')} style={styles.loginLink}>
                 <Text style={styles.loginLinkText}>
                     Đã có tài khoản? <Text style={styles.loginLinkBold}>Đăng nhập</Text>
                 </Text>

@@ -9,6 +9,7 @@ export const COLORS = {
     border: "#E8E8E8",
     error: "#FF0000",
     success: "#52C41A",
+    white: "#FFFFFF",
 };
 
 export const SIZES = {

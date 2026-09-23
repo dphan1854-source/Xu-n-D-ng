@@ -47,6 +47,9 @@
       ],
       "@contexts/*": [
         "src/contexts/*"
+      ],
+      "@api/*": [
+        "src/api/*" // ➕ MỚI (Chương 6) — cho axiosClient
       ]
     }
   }

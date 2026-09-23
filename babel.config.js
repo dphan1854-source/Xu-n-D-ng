@@ -19,6 +19,7 @@ module.exports = {
           '@constants': './src/constants',
           '@types': './src/types',
           '@contexts': './src/contexts',
+          '@api': './src/api', // ➕ MỚI (Chương 6) — dùng cho axiosClient
         },
       },
     ],
