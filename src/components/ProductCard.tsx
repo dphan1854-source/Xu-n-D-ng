@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: CARD_WIDTH, // Ảnh hình vuông
+    backgroundColor: '#e2e8f0',
   },
   infoContainer: {
     padding: 10,

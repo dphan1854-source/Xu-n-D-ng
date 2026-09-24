@@ -41,7 +41,14 @@ const OrderDetailScreen = ({ route }: Props) => {
                     </View>
                 ))}
 
-                <Text style={styles.total}>Tổng: {formatCurrency(order.total)}</Text>
+                {order.shippingFee !== undefined && (
+                    <View style={styles.itemRow}>
+                        <Text style={{ flex: 1, color: COLORS.textLight }}>Phí vận chuyển</Text>
+                        <Text style={{ color: COLORS.textLight }}>{formatCurrency(order.shippingFee)}</Text>
+                    </View>
+                )}
+
+                <Text style={styles.total}>Tổng thanh toán: {formatCurrency(order.total)}</Text>
 
                 {order.status === 'PENDING' ? (
                     <ShopButton

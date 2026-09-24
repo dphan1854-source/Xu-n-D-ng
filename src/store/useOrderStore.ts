@@ -9,6 +9,8 @@ export interface OrderRecord {
     id: string;
     items: CartItem[];
     total: number;
+    subtotal?: number;
+    shippingFee?: number;
     status: PaymentStatus;
     createdAt: string; // ISO
 }
