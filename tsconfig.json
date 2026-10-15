@@ -49,7 +49,16 @@
         "src/contexts/*"
       ],
       "@api/*": [
-        "src/api/*" // ➕ MỚI (Chương 6) — cho axiosClient
+        "src/api/*"
+      ],
+      "expo-secure-store": [
+        "src/services/secureStore"
+      ],
+      "expo-local-authentication": [
+        "src/services/localAuthentication"
+      ],
+      "expo-haptics": [
+        "src/services/haptics"
       ]
     }
   }

@@ -15,6 +15,7 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import ProductCard from '@components/ProductCard';
 import LocationBadge from '@components/LocationBadge';
+import ShopButton from '@components/ShopButton';
 import { COLORS, SIZES } from '@constants/theme';
 import { useAuthStore } from '@store/useAuthStore';
 import { useCartStore } from '@store/useCartStore';
@@ -31,8 +32,8 @@ type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList>
 >;
 
-class NetworkError extends Error {}
-class ZodValidationError extends Error {}
+class NetworkError extends Error { }
+class ZodValidationError extends Error { }
 
 const PAGE_SIZE = 6;
 
@@ -101,35 +102,25 @@ const HomeScreen = ({ navigation, route }: Props) => {
         {/* HEADER CÂN ĐỐI, HIỂN THỊ CHỮ RÕ RÀNG VÀ KHÔNG BỊ TRÀN MẤT NÚT THOÁT */}
         <View style={styles.header}>
           <Text style={styles.headerTitle} numberOfLines={1}>Khám phá</Text>
-
-          <View style={styles.headerButtons}>
-            <TouchableOpacity
-              style={styles.headerBtn}
-              onPress={() => navigation.navigate('Cart')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.headerBtnText}>
-                Giỏ hàng ({totalQuantity})
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.headerBtn}
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <ShopButton
+              title="Hỏi AI"
+              onPress={() => navigation.navigate('AIChat')}
+              style={{ width: 80, height: 32, paddingHorizontal: 0, backgroundColor: COLORS.primary }}
+              textStyle={{ fontSize: 13 }}
+            />
+            <ShopButton
+              title="Quét Mã"
               onPress={() => navigation.navigate('Scanner')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.headerBtnText}>Quét mã</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.headerBtn, styles.logoutBtn]}
+              style={{ width: 90, height: 32, paddingHorizontal: 0, backgroundColor: COLORS.secondary }}
+              textStyle={{ fontSize: 13 }}
+            />
+            <ShopButton
+              title="Thoát"
               onPress={logout}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.headerBtnText, styles.logoutBtnText]}>
-                Thoát
-              </Text>
-            </TouchableOpacity>
+              style={{ width: 70, height: 32, paddingHorizontal: 0 }}
+              textStyle={{ fontSize: 13 }}
+            />
           </View>
         </View>
 

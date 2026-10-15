@@ -171,10 +171,12 @@ const CheckoutScreen = () => {
             <SafeAreaView style={styles.safeArea}>
                 <ScrollView contentContainerStyle={styles.qrContainer} showsVerticalScrollIndicator={false}>
                     <View style={styles.successBadge}>
-                        <Text style={styles.successBadgeIcon}>🎉</Text>
-                        <Text style={styles.successBadgeTitle}>Đặt hàng thành công!</Text>
+                        <Text style={styles.successBadgeIcon}>{isPaid ? '🎉' : '⏳'}</Text>
+                        <Text style={styles.successBadgeTitle}>
+                            {isPaid ? 'Đặt hàng & Thanh toán thành công!' : 'Đang chờ thanh toán'}
+                        </Text>
                         <Text style={styles.successBadgeSub}>
-                            {isPaid ? 'Đơn hàng đã được thanh toán thành công' : 'Quét mã VietQR dưới đây để thanh toán'}
+                            {isPaid ? 'Cảm ơn bạn! Đơn hàng đã được thanh toán thành công' : 'Vui lòng quét mã VietQR dưới đây để thanh toán'}
                         </Text>
                     </View>
 

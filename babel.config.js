@@ -20,6 +20,9 @@ module.exports = {
           '@types': './src/types',
           '@contexts': './src/contexts',
           '@api': './src/api', // ➕ MỚI (Chương 6) — dùng cho axiosClient
+          'expo-secure-store': './src/services/secureStore',
+          'expo-local-authentication': './src/services/localAuthentication',
+          'expo-haptics': './src/services/haptics',
         },
       },
     ],
