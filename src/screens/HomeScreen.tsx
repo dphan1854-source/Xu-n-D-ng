@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -55,6 +55,15 @@ const HomeScreen = ({ navigation, route }: Props) => {
   const rawScannedCode = route.params?.scannedCode;
   const scannedCode = rawScannedCode ? extractCleanCode(rawScannedCode) : undefined;
 
+  // State theo dõi trạng thái kết nối server NestJS
+  const [isServerOnline, setIsServerOnline] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/health`) // Dùng đúng API_BASE_URL — nguồn sự thật duy nhất cho IP LAN
+      .then((res) => setIsServerOnline(res.ok))
+      .catch(() => setIsServerOnline(false));
+  }, []);
+
   const {
     data: allProducts = [],
     isLoading,
@@ -77,7 +86,20 @@ const HomeScreen = ({ navigation, route }: Props) => {
       <View style={styles.container}>
         {/* HEADER CÂN ĐỐI, HIỂN THỊ CHỮ RÕ RÀNG VÀ KHÔNG BỊ TRÀN MẤT NÚT THOÁT */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle} numberOfLines={1}>Khám phá</Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.headerTitle} numberOfLines={1}>
+              Khám phá
+            </Text>
+            {isServerOnline !== null && (
+              <View
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: isServerOnline ? '#4CD964' : '#FF3B30' },
+                ]}
+              />
+            )}
+          </View>
+
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
             <ShopButton
               title="Hỏi AI"
@@ -182,12 +204,22 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
+    marginRight: 6,
+  },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.text,
-    flexShrink: 1,
-    marginRight: 6,
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginLeft: 6,
   },
   scannedBanner: {
     backgroundColor: '#FFFBE6',
