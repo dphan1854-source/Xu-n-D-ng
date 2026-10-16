@@ -1,9 +1,10 @@
 // src/api/axiosClient.ts (tiếp)
 import axios from 'axios';
 import { useAuthStore } from '@store/useAuthStore';
+import { API_BASE_URL } from '@constants/api';
 
 const axiosClient = axios.create({
-    baseURL: 'https://api.shopai.com',
+    baseURL: API_BASE_URL,
     timeout: 10000,
     headers: { 'Content-Type': 'application/json' },
 });

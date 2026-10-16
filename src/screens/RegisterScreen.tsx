@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import axiosClient from '@api/axiosClient';
 import ShopButton from '@components/ShopButton';
 import ShopInput from '@components/ui/ShopInput';
 import { COLORS, SIZES } from '@constants/theme';
@@ -19,6 +20,7 @@ const RegisterScreen = () => {
         confirm?: string;
     }>({});
     const [loading, setLoading] = useState(false);
+    const [serverError, setServerError] = useState<string | null>(null);
 
     const login = useAuthStore((state) => state.login);
 
@@ -32,15 +34,24 @@ const RegisterScreen = () => {
         return Object.keys(next).length === 0;
     };
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (!validate()) return;
         setLoading(true);
-        // Ch.5: giả lập đăng ký thành công → cấp token như login.
-        // Ch.9: đổi thành POST /api/auth/register thật (bcrypt + Prisma).
-        setTimeout(() => {
+        setServerError(null);
+
+        try {
+            const response = await axiosClient.post('/api/auth/register', {
+                email,
+                password,
+                name: name.trim(),
+            });
+            login(response.data.accessToken);
+        } catch (error: any) {
+            const msg = error?.response?.data?.message;
+            setServerError(Array.isArray(msg) ? msg.join(', ') : msg ?? 'Đăng ký thất bại');
+        } finally {
             setLoading(false);
-            login('mock_token_123');
-        }, 1200);
+        }
     };
 
     return (
@@ -55,14 +66,20 @@ const RegisterScreen = () => {
                 label="Họ tên"
                 placeholder="Nguyễn Văn A"
                 value={name}
-                onChangeText={setName}
+                onChangeText={(val) => {
+                    setName(val);
+                    if (serverError) setServerError(null);
+                }}
                 error={errors.name}
             />
             <ShopInput
                 label="Email"
                 placeholder="you@example.com"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(val) => {
+                    setEmail(val);
+                    if (serverError) setServerError(null);
+                }}
                 error={errors.email}
                 autoCapitalize="none"
                 keyboardType="email-address"
@@ -71,7 +88,10 @@ const RegisterScreen = () => {
                 label="Mật khẩu"
                 placeholder="Ít nhất 6 ký tự"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(val) => {
+                    setPassword(val);
+                    if (serverError) setServerError(null);
+                }}
                 error={errors.password}
                 secureTextEntry
             />
@@ -79,10 +99,15 @@ const RegisterScreen = () => {
                 label="Xác nhận mật khẩu"
                 placeholder="Nhập lại mật khẩu"
                 value={confirm}
-                onChangeText={setConfirm}
+                onChangeText={(val) => {
+                    setConfirm(val);
+                    if (serverError) setServerError(null);
+                }}
                 error={errors.confirm}
                 secureTextEntry
             />
+
+            {serverError && <Text style={styles.errorText}>⚠️ {serverError}</Text>}
 
             <ShopButton
                 title="Đăng ký ngay"
@@ -119,6 +144,12 @@ const styles = StyleSheet.create({
         color: COLORS.textLight,
         textAlign: "center",
         marginBottom: 32,
+    },
+    errorText: {
+        color: COLORS.error,
+        fontSize: SIZES.body2,
+        textAlign: 'center',
+        marginBottom: 12,
     },
     submitBtn: { marginTop: 8 },
     loginLink: { marginTop: 20, alignItems: "center" },

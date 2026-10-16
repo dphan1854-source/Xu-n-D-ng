@@ -5,10 +5,9 @@ import {
   StyleSheet,
   Pressable,
   ActivityIndicator,
-  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { CompositeScreenProps } from '@react-navigation/native';
@@ -20,50 +19,34 @@ import { COLORS, SIZES } from '@constants/theme';
 import { useAuthStore } from '@store/useAuthStore';
 import { useCartStore } from '@store/useCartStore';
 import { Product, ProductListSchema } from '../types/product.schema';
+import { API_BASE_URL } from '@constants/api';
 import type { HomeStackParamList } from '@navigation/HomeStackNavigator';
 import type { MainTabParamList } from '@navigation/MainTabNavigator';
-import { getReliableProductImage } from '@utils/productImages';
 import { extractCleanCode } from '@services/barcodeService';
-
-import { SHOP_PRODUCTS } from '../data/mockProducts';
 
 type Props = CompositeScreenProps<
   NativeStackScreenProps<HomeStackParamList, 'Home'>,
   BottomTabScreenProps<MainTabParamList>
 >;
 
-class NetworkError extends Error { }
-class ZodValidationError extends Error { }
+const API_URL = `${API_BASE_URL}/api/products`;
 
-const PAGE_SIZE = 6;
+const fetchProductsAPI = async (): Promise<Product[]> => {
+  const response = await fetch(API_URL);
+  if (!response.ok) {
+    throw new Error('Lỗi mạng từ Server NestJS');
+  }
+  const rawData = await response.json(); // Dữ liệu thô — chưa hề được tin tưởng, dù nó đến từ Server "của mình"
 
-const fetchProductsPage = async ({
-  pageParam = 1,
-}): Promise<{ items: Product[]; nextPage: number | null }> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const isNetworkOk = true;
-      if (!isNetworkOk) {
-        reject(new NetworkError('Mất kết nối mạng, vui lòng thử lại!'));
-        return;
-      }
+  // TRẠM KIỂM SOÁT ZOD (giống hệt Chương 6): không vì Server là "hàng nhà mình" mà bỏ qua bước kiểm duyệt này
+  const result = ProductListSchema.safeParse(rawData);
+  if (!result.success) {
+    console.error('❌ Zod chặn dữ liệu bẩn từ Server NestJS:', result.error.format());
+    throw new Error('Dữ liệu sản phẩm từ Server không hợp lệ (Zod validation failed)!');
+  }
 
-      const start = (pageParam - 1) * PAGE_SIZE;
-      const rawItems = SHOP_PRODUCTS.slice(start, start + PAGE_SIZE);
-
-      const result = ProductListSchema.safeParse(rawItems);
-      if (!result.success) {
-        console.error('❌ Zod chặn dữ liệu bẩn từ API:', result.error.format());
-        reject(new ZodValidationError('Dữ liệu sản phẩm không hợp lệ!'));
-        return;
-      }
-
-      const hasMore = start + PAGE_SIZE < SHOP_PRODUCTS.length;
-      resolve({ items: result.data, nextPage: hasMore ? pageParam + 1 : null });
-    }, 1000);
-  });
+  return result.data; // Đã được Zod đảm bảo 100% đúng kiểu, an toàn tuyệt đối
 };
-
 
 const HomeScreen = ({ navigation, route }: Props) => {
   const logout = useAuthStore((state) => state.logout);
@@ -73,26 +56,19 @@ const HomeScreen = ({ navigation, route }: Props) => {
   const scannedCode = rawScannedCode ? extractCleanCode(rawScannedCode) : undefined;
 
   const {
-    data,
+    data: allProducts = [],
     isLoading,
     isError,
     error,
     refetch,
     isRefetching,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ['productsInfinite'],
-    queryFn: fetchProductsPage,
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.nextPage,
+  } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProductsAPI,
   });
 
-  const allProducts = data?.pages.flatMap((page) => page.items) ?? [];
-
   const errorMessage =
-    error instanceof ZodValidationError
+    error?.message?.includes('Zod validation failed')
       ? '⚠️ Dữ liệu sản phẩm không hợp lệ — vui lòng báo quản trị viên!'
       : '📡 Lỗi kết nối mạng — vui lòng kéo xuống để thử lại!';
 
@@ -180,19 +156,6 @@ const HomeScreen = ({ navigation, route }: Props) => {
             contentContainerStyle={{ padding: SIZES.padding }}
             refreshing={isRefetching}
             onRefresh={refetch}
-            onEndReached={() => {
-              if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-            }}
-            onEndReachedThreshold={0.5}
-            ListFooterComponent={
-              isFetchingNextPage ? (
-                <ActivityIndicator
-                  size="small"
-                  color={COLORS.primary}
-                  style={{ marginVertical: 16 }}
-                />
-              ) : null
-            }
           />
         )}
       </View>
@@ -225,31 +188,6 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     flexShrink: 1,
     marginRight: 6,
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    flexShrink: 0,
-  },
-  headerBtn: {
-    height: 32,
-    paddingHorizontal: 9,
-    borderRadius: 6,
-    backgroundColor: COLORS.secondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  logoutBtn: {
-    backgroundColor: COLORS.primary,
-  },
-  logoutBtnText: {
-    color: '#FFFFFF',
   },
   scannedBanner: {
     backgroundColor: '#FFFBE6',
